@@ -55,9 +55,9 @@ public class ProbeCpu extends AbstractAgentTask {
 		if (ri >= 0) {
 			resValRow.set(ri, String.valueOf(c.getContextSwitches()));
 		}
-		ri = resValRow.indexOf("interrupts");
+		ri = resValRow.indexOf("systemcpuload.pc");
 		if (ri >= 0) {
-			resValRow.set(ri, String.valueOf(c.getInterrupts()));
+			resValRow.set(ri, String.valueOf(c.getSystemCpuLoadTicks()[0]*100.0));
 		}
 		resultValues.add(resValRow);
 	}
