@@ -1,0 +1,25 @@
+{
+  "agent" : 
+  {
+    "name": "/",
+    "username": "agent-0",
+    "password": "agent-0"
+  },
+  "amqp": 
+  {
+    "host" : "localhost",
+    "port" : 5672
+  },
+  "modules": 
+  [
+    {
+      "name":"systemInfo",
+      "capabilities":[
+        "io.nms.agent.sysinfo.ProbeCpu", 
+        "io.nms.agent.sysinfo.ProbeMemory",
+        "io.nms.agent.sysinfo.ProbeNetwork"
+      ],
+      "config": {}
+    }
+  ]
+}
