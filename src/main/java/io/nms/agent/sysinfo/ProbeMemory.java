@@ -24,15 +24,12 @@ public class ProbeMemory extends AbstractAgentTask {
     verb = "measure";
     name = "memory";
 	label = "Physical memory usage";
-	/*resultColumns = Arrays.asList(
-			"physical.available","physical.total","physical.pagesize",
-			"virtual.swaptotal","virtual.swapused","virtual.swappagesin","virtual.swappagesout");*/
 	
 	resultColumns = Arrays.asList("available.b","total.b");
 	role = "admin";
 	
-    System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-    System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
+    // System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+    // System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
     SystemInfo si = new SystemInfo();
     hal = si.getHardware();
   }
@@ -41,11 +38,6 @@ public class ProbeMemory extends AbstractAgentTask {
     LOG.info("Probe Memory...");
     GlobalMemory gm = hal.getMemory();
     resultValues.clear();
-    /*if (specification.getResults().get(0).contains("physical.")) {
-      putPhysicalMemoryResultValues(gm);
-    } else if (specification.getResults().get(0).contains("virtual.")) {
-      putVirtualMemoryResultValues(gm);
-    }*/
     putPhysicalMemoryResultValues(gm);
     return Errors.TASK_SUCCESS;
   }
@@ -66,27 +58,5 @@ public class ProbeMemory extends AbstractAgentTask {
 	  resValRow.set(ri, FormatUtil.formatBytes(m.getPageSize()));
 	}
 	resultValues.add(resValRow);
-  }
-  
-  private void putVirtualMemoryResultValues(GlobalMemory m) { 
-    List<String> resValRow = new ArrayList<String>();
-	resValRow.addAll(specification.getResults());
-	int ri = resValRow.indexOf("virtual.swaptotal");
-	if (ri >= 0) {
-	  resValRow.set(ri, FormatUtil.formatBytes(m.getSwapTotal()));
-	}
-	ri = resValRow.indexOf("virtual.swapused");
-	if (ri >= 0) {
-	  resValRow.set(ri, FormatUtil.formatBytes(m.getSwapUsed()));
-	}
-	ri = resValRow.indexOf("virtual.swappagesin");
-	if (ri >= 0) {
-	  resValRow.set(ri, String.valueOf(m.getSwapPagesIn()));
-	}
-	ri = resValRow.indexOf("virtual.swappagesout");
-	if (ri >= 0) {
-	  resValRow.set(ri, String.valueOf(m.getSwapPagesOut()));
-	}
-	resultValues.add(resValRow);
-  }
+  }  
 }

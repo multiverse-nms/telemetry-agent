@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 public class TaskManager {
 	private static TaskManager instance = new TaskManager();
@@ -47,7 +47,7 @@ public class TaskManager {
 	}
 	
 	// cancels a list of tasks
-	public void cancel(Set<String> taskIdList, Future<Void> future) {
+	public void cancel(Set<String> taskIdList, Promise<Void> future) {
 		for(String taskId : taskIdList){
 			java.util.concurrent.Future<?> taskRef = runningTasks.get(taskId);
 			if (taskRef != null) {

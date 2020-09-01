@@ -22,28 +22,15 @@ public class ProbeNetwork extends AbstractAgentTask {
     super(spec, context);
     verb = "measure";
     name = "network";
-	label = "Network interface performance";
-	/*resultColumns = Arrays.asList("host.name","host.domainname",
-			"host.ipv4defgateway","host.ipv6defgateway",
-			"netif.name","netif.displayname",
-			"netif.mtu","netif.speed",
-			"netif.macaddress",
-			"netif.ipv4address","netif.ipv6address",
-			"netif.bytesrcvd","netif.bytessent",
-			"netif.pktsrcvd","netif.pktssent",
-			"netif.inerrors","netif.outerrors");*/
+	label = "Network interface performance";	
 	resultColumns = Arrays.asList(
-			"name",
-			"macaddress",
-			"ipv4address",
 			"bytesrcvd.b","bytessent.b",
 			"pktsrcvd.n","pktssent.n",
 			"inerrors.n","outerrors.n");
-	//parameters.put("netif.name", "<String>");
 	role = "admin";
 
-    System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-    System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
+    // System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+    // System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
     SystemInfo si = new SystemInfo();
     hal = si.getHardware();
     si.getOperatingSystem();
@@ -54,28 +41,8 @@ public class ProbeNetwork extends AbstractAgentTask {
 	resultValues.clear();
 	List<String> resValRow = new ArrayList<String>();
 	resValRow.addAll(specification.getResults());
-	/*if (specification.getResults().get(0).contains("host.")) {
-	  NetworkParams np = os.getNetworkParams();
-      int ri = resValRow.indexOf("host.name");
-      if (ri >= 0) {
-        resValRow.set(ri, np.getHostName());
-      }
-      ri = resValRow.indexOf("host.domainname");
-      if (ri >= 0) {
-        resValRow.set(ri, np.getDomainName());
-      }
-      ri = resValRow.indexOf("host.ipv4defgateway");
-      if (ri >= 0) {
-        resValRow.set(ri, np.getIpv4DefaultGateway());
-      }
-      ri = resValRow.indexOf("host.ipv6defgateway");
-      if (ri >= 0) {
-        resValRow.set(ri, np.getIpv6DefaultGateway());
-      }
-      resultValues.add(resValRow);
-	} else if (specification.getResults().get(0).contains("netif.")) {*/
-	  NetworkIF[] netIfs = hal.getNetworkIFs();
-      if (specification.getParameters().containsKey("netif.name")) {
+	List<NetworkIF> netIfs = hal.getNetworkIFs();
+    if (specification.getParameters().containsKey("netif.name")) {
         String itfName = specification.getParameters().get("netif.name");
     	for (NetworkIF nif : netIfs) {
     	  if (itfName.equals(nif.getName())) {
@@ -83,12 +50,11 @@ public class ProbeNetwork extends AbstractAgentTask {
     	    break;
     	  }
     	}
-      } else {
+    } else {
         for (NetworkIF nif : netIfs) {
           putNetItfResultValues(nif);
         }
-      }
-	//}
+    }
 	return Errors.TASK_SUCCESS;
   }
   

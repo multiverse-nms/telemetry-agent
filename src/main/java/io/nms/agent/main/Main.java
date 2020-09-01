@@ -14,6 +14,7 @@ import io.nms.agent.common.AmqpAgentVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -52,8 +53,8 @@ public class Main {
 			String moduleName = modules.getJsonObject(i).getString("name", "[Unnamed]");
 			LOG.info("Deploying "+moduleName+" module.");
 			
-			Future<Void> deployFuture = Future.future();
-			futures.add(deployFuture);
+			Promise<Void> deployFuture = Promise.promise();
+			futures.add(deployFuture.future());
 				
 			JsonObject vertConfig = new JsonObject();
 			vertConfig.put("module", modules.getJsonObject(i));
@@ -83,7 +84,7 @@ public class Main {
 			System.exit(0);
 		} else {
 			CompositeFuture.all(futures)
-				.setHandler(ar -> {
+				.onComplete(ar -> {
 					if (ar.failed()) {
 						LOG.error("Error on starting agent", ar.cause().getMessage());
 			        	System.exit(1);
@@ -100,11 +101,10 @@ public class Main {
             public void run()
             {
             	List<Future> futures = new ArrayList<>();
-            	Future<Void> undeployFuture = Future.future();
     			
             	for (int i = 0; i < verticles.size(); i++) {
-        			undeployFuture = Future.future();
-        			futures.add(undeployFuture);
+            		Promise<Void> undeployFuture = Promise.promise();
+        			futures.add(undeployFuture.future());
         			try {
         				verticles.get(i).stop(undeployFuture);
         			} catch (Exception e) {	
@@ -113,16 +113,16 @@ public class Main {
         		}
             	
             	CompositeFuture.all(futures)
-				.setHandler(ar -> {
-					if (ar.failed()) {
-						LOG.error("Agent terminated with errors", ar.cause());
-			        	System.exit(1);
-					} else {
-						LOG.info(futures.size() + " module(s) undeployed.");
-						LOG.info("Agent successfully terminated.");
-						System.exit(0);
-					}
-				});
+            			.onComplete(ar -> {
+            				if (ar.failed()) {
+            					LOG.error("Agent terminated with errors", ar.cause());
+            					System.exit(1);
+            				} else {
+            					LOG.info(futures.size() + " module(s) undeployed.");
+            					LOG.info("Agent successfully terminated.");
+            					System.exit(0);
+            				}
+            			});
             }
         });
 	}

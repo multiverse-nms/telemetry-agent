@@ -36,12 +36,12 @@ public class ProbeDisks extends AbstractAgentTask {
 			"partition.id","partition.name","partition.type","partition.uuid",
 			"partition.size","partition.major","partition.minor","partition.mountpoint");
 	
-		/* TODO: support Registry to fully use parameters */
-		parameters.put("disk.name", "");
+		/* TODO: Registry to fully use parameters */
+		// parameters.put("disk.name", "");
 		//params.put("partition.id", "");
 
-		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-		System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
+		// System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+		// System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
 		SystemInfo si = new SystemInfo();
 		hal = si.getHardware();
 	}
@@ -50,7 +50,7 @@ public class ProbeDisks extends AbstractAgentTask {
 	public short executeSpec() {
 		LOG.info("Probe Disks...");
 		resultValues.clear(); 
-		HWDiskStore[] diskStores = hal.getDiskStores();
+		List<HWDiskStore> diskStores = hal.getDiskStores();
 		if (specification.getResults().get(0).contains("disk.")) {
 			if (specification.getParameters().containsKey("disk.name")) {
 				String diskname = specification.getParameters().get("disk.name");
@@ -70,7 +70,7 @@ public class ProbeDisks extends AbstractAgentTask {
 				String diskName = specification.getParameters().get("disk.name");
 				for (HWDiskStore disk : diskStores) {  
 					if (disk.getName().equals(diskName)) {
-						HWPartition[] partitions = disk.getPartitions();
+						List<HWPartition> partitions = disk.getPartitions();
 						if (partitions != null) {
 							for (HWPartition part : partitions) {  
 								putPartitionResultValues(part);
@@ -136,9 +136,9 @@ public class ProbeDisks extends AbstractAgentTask {
 		}
 		ri = resValRow.indexOf("disk.partsnumber");
 		if (ri >= 0) {
-			HWPartition[] partitions = d.getPartitions();
+			List<HWPartition> partitions = d.getPartitions();
 			if (partitions != null) {
-				resValRow.set(ri, String.valueOf(partitions.length));
+				resValRow.set(ri, String.valueOf(partitions.size()));
 			} else {
 				resValRow.set(ri, "0");
 			}

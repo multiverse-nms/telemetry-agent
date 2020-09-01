@@ -49,8 +49,6 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected String moduleName = "[Unnamed]";
 	protected JsonArray capClasses = new JsonArray();
 	protected JsonObject moduleConfig = new JsonObject();
-	protected String username = "";
-	protected String password = "";
 	
 	// TODO: put in config file
 	protected int heartbeatMs = 60000;
@@ -71,7 +69,6 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected abstract void publishResult(String res, Promise<Void> prom);
 	protected abstract void subscribeToSpecifications(Promise<Void> prom);
 	protected abstract void publishCapabilities(Promise<Void> prom);
-	protected abstract void requestAuthentication(Promise<Void> prom);
 	
 	@Override
 	public void start() {
@@ -114,7 +111,6 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected Message processMessage(Message msg) {
 		if (msg.getMsgType() == Message.Type.SPECIFICATION) {
 			Specification spec = (Specification) msg;
-			//spec.setSchema();
 			if (!spec.check()) {
 				Message rct = new Receipt(spec);
 				rct.setErrors(spec.getErrors());
@@ -123,14 +119,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			}
 			return processSpecification(spec);
 		}
-		if (msg.getMsgType() == Message.Type.INTERRUPT) {
-			/*Interrupt itr = (Interrupt) msg;
-			if (!itr.check()) {
-				Message rct = new Receipt(itr);
-				rct.setErrors(itr.getErrors());
-				rct.setTimestampNow();
-				return rct;
-			}*/
+		if (msg.getMsgType() == Message.Type.INTERRUPT) {			
 			return processInterrupt((Interrupt) msg);
 		}
 		Message rct = new Receipt(msg);
@@ -156,7 +145,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			return rct;
 		}
 		
-		// use (token + capability name) as task ID
+		// use (token + capability name) as task ID:
 		//String taskId = spec.getToken() + "-" + spec.getName();
 		
 		// use spec.schema as task id
@@ -164,7 +153,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 		
 		LOG.info("Corresponding task found and checked: "+taskId);
 		
-		// for now, accept only periodic tasks (most interesting)
+		// for now, accept only periodic tasks
 		if (spec.isPeriodic()) {
 			
 			// if already exists, stop and remove
@@ -185,9 +174,6 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			}
 			// create receipt
 			Message rct = new Receipt(spec);
-			//Map<String, String> content = new HashMap<String, String>();
-			//content.put("task.id", taskId);
-			//rct.setContent(content);
 			rct.setTimestampNow();
 			return rct;
 		}
@@ -199,10 +185,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	
 	private Message processInterrupt(Interrupt itr) {
 		LOG.info("Process Interrupt.");
-		Message rct = new Receipt(itr);
-		//String taskId = msg.getParameters().get("task.id");
-		//taskManager.cancel(taskId);
-		//tasks.remove(taskId);
+		Message rct = new Receipt(itr);		
 		String taskId = itr.getSchema();
 		if (tasks.containsKey(taskId)) {
 			if (tasks.get(taskId).decrementSpecNbr() == 0) {
@@ -248,7 +231,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			res.setTimestamp(ts.toString());
 			
 			final Promise<Void> pub = Promise.promise();
-			pub.future().setHandler(pubRes -> {
+			pub.future().onComplete(pubRes -> {
 				if (pubRes.succeeded()) {
 					LOG.info("Result published.");
 				} else {
@@ -257,7 +240,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			});
 			publishResult(Message.toJsonString(res, false), pub);
 		} else {
-			LOG.warn("Something went wrong with task "+taskId);
+			LOG.warn("Something went wrong with task " + taskId);
 		}
 	}
 	@Override
@@ -269,9 +252,9 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	
 	@Override
 	public void stop(Future stopFuture) throws Exception {
-		Future<Void> futCancelTasks = Future.future();
-		futCancelTasks.setHandler(res -> {
-			/* TODO: send msg to DSS... */
+		Promise<Void> futCancelTasks = Promise.promise();
+		futCancelTasks.future().onComplete(res -> {
+			// TODO: publish Receipt...
 			LOG.info("Running tasks canceled.");
 			tasks.clear();
 			try {
