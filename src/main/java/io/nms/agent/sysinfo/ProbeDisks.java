@@ -39,9 +39,7 @@ public class ProbeDisks extends AbstractAgentTask {
 		/* TODO: Registry to fully use parameters */
 		// parameters.put("disk.name", "");
 		//params.put("partition.id", "");
-
-		// System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-		// System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
+		
 		SystemInfo si = new SystemInfo();
 		hal = si.getHardware();
 	}

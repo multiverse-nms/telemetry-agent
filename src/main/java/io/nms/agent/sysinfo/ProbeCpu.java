@@ -28,13 +28,9 @@ public class ProbeCpu extends AbstractAgentTask {
 		super(spec, context); 
 		verb = "measure";
 		name = "cpu";
-		label = "CPU performance and info";
-		
+		label = "CPU performance and info";		
 		resultColumns = Arrays.asList("systemcpuload.pc","contextswitches.n");
-		role = "admin";
- 
-		// System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-		// System.setProperty(org.slf4j.impl.SimpleLogger.LOG_FILE_KEY, "System.err");     
+		role = "admin"; 
 		SystemInfo si = new SystemInfo();
 		hal = si.getHardware();
 	}
