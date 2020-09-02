@@ -1,6 +1,6 @@
 <h1 align="center"> Multiverse Network Management System [Telemetry Agent] </h1>
-<p align="center">
+<!-- p align="center">
   <img src="docs/images/logo.png" />
-</p>
+</p -->
 
-> Note: This repo is the Telemetry Agent part of the MNMS project.
+This repo is the Telemetry Agent part of the [MNMS project](https://github.com/amar-ox/nms-microservice).
