@@ -13,7 +13,9 @@
     {
       "name":"systemInfo",
       "capabilities":[
-        "io.nms.agent.sysinfo.ProbeCpu", 
+        "io.nms.agent.sysinfo.ProbeCpu",
+        "io.nms.agent.sysinfo.ProbeProcesses",
+        "io.nms.agent.sysinfo.ProbeLogins",
         "io.nms.agent.sysinfo.ProbeMemory",
         "io.nms.agent.sysinfo.ProbeNetwork"
       ],

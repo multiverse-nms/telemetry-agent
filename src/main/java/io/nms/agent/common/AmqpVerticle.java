@@ -1,5 +1,8 @@
 package io.nms.agent.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.nms.agent.message.Capability;
 import io.nms.agent.message.Message;
 import io.vertx.amqp.AmqpClient;
@@ -8,6 +11,7 @@ import io.vertx.amqp.AmqpConnection;
 import io.vertx.amqp.AmqpMessage;
 import io.vertx.amqp.AmqpReceiver;
 import io.vertx.amqp.AmqpSender;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
@@ -49,7 +53,11 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 	
 	/* Agent is publisher. pub-sub for Agents to send Caps. to DSS */
 	protected void publishCapabilities(Promise<Void> promise) {		
+		List<Future> fCaps = new ArrayList<>();
 		for (Capability c : capabilities) {
+			Promise<Void> p = Promise.promise();
+			fCaps.add(p.future());
+
 			if (c.getAgentId().isEmpty()) {
 				c.setAgentId(agentName);
 			}
@@ -62,15 +70,16 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 			
 			connection.createSender("/capabilities", done -> {
 				if (done.failed()) {
-					promise.fail(done.cause());
+					p.fail(done.cause());
 				} else {
 					AmqpSender sender = done.result();
 					AmqpMessage msg = AmqpMessage.create().withBody(sCap).build();
-					sender.send(msg);					
+					sender.send(msg);
+					p.complete();					
 				}
 		    });
 		}
-		promise.complete();
+		CompositeFuture.all(fCaps).map((Void) null).onComplete(promise);
 	}
 	
 	/* Agent is receiver. req-rep for Specs. from Clients */
@@ -135,7 +144,7 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 	}
 	
 	@Override
-	public void stop(Future stopFuture) throws Exception {	
+	public void stop(Future<Void> stopFuture) throws Exception {	
 		Future<Void> futStop = Future.future(promise -> {
 			try {
 				super.stop(promise);

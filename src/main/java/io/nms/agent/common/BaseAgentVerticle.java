@@ -51,7 +51,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected JsonObject moduleConfig = new JsonObject();
 	
 	// TODO: put in config file
-	protected int heartbeatMs = 60000;
+	protected int heartbeatMs = 60000 * 30;
 	
 	// reference to task manager
 	protected TaskManager taskManager;
@@ -251,7 +251,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	}
 	
 	@Override
-	public void stop(Future stopFuture) throws Exception {
+	public void stop(Future<Void> stopFuture) throws Exception {
 		Promise<Void> futCancelTasks = Promise.promise();
 		futCancelTasks.future().onComplete(res -> {
 			// TODO: publish Receipt...
