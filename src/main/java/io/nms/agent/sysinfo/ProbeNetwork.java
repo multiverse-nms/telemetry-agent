@@ -22,12 +22,15 @@ public class ProbeNetwork extends AbstractAgentTask {
     super(spec, context);
     verb = "measure";
     name = "network";
-	label = "Network interface performance";	
-	resultColumns = Arrays.asList(
-			"bytesrcvd.b","bytessent.b",
+	  label = "Network interface performance";	
+	  resultColumns = Arrays.asList(
+      "name",
+			"bytesrcvd.kb","bytessent.kb",
 			"pktsrcvd.n","pktssent.n",
 			"inerrors.n","outerrors.n");
-	role = "admin";
+	  role = "admin";
+
+    parameters.put("itfName", "");
    
     SystemInfo si = new SystemInfo();
     hal = si.getHardware();
@@ -40,8 +43,8 @@ public class ProbeNetwork extends AbstractAgentTask {
 	List<String> resValRow = new ArrayList<String>();
 	resValRow.addAll(specification.getResults());
 	List<NetworkIF> netIfs = hal.getNetworkIFs();
-    if (specification.getParameters().containsKey("netif.name")) {
-        String itfName = specification.getParameters().get("netif.name");
+    if ( !specification.getParameters().get("itfName").isEmpty()) {
+        String itfName = specification.getParameters().get("itfName");
     	for (NetworkIF nif : netIfs) {
     	  if (itfName.equals(nif.getName())) {
     	    putNetItfResultValues(nif);
@@ -87,13 +90,13 @@ public class ProbeNetwork extends AbstractAgentTask {
       if (ri >= 0) {
     	  resValRow.set(ri, Arrays.toString(n.getIPv6addr()));
       }
-      ri = resValRow.indexOf("bytesrcvd.b");
+      ri = resValRow.indexOf("bytesrcvd.kb");
       if (ri >= 0) {
-    	  resValRow.set(ri, String.valueOf(n.getBytesRecv()));
+    	  resValRow.set(ri, String.valueOf(n.getBytesRecv() / 1024));
       }
-      ri = resValRow.indexOf("bytessent.b");
+      ri = resValRow.indexOf("bytessent.kb");
       if (ri >= 0) {
-    	  resValRow.set(ri, String.valueOf(n.getBytesSent()));
+    	  resValRow.set(ri, String.valueOf(n.getBytesSent() / 1024));
       }
       ri = resValRow.indexOf("pktsrcvd.n");
       if (ri >= 0) {

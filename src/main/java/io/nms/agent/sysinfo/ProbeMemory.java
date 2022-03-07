@@ -25,7 +25,7 @@ public class ProbeMemory extends AbstractAgentTask {
     name = "memory";
 	label = "Physical memory usage";
 	
-	resultColumns = Arrays.asList("available.b","total.b");
+	resultColumns = Arrays.asList("available.mb");
 	role = "admin";
     
     SystemInfo si = new SystemInfo();
@@ -43,9 +43,9 @@ public class ProbeMemory extends AbstractAgentTask {
   private void putPhysicalMemoryResultValues(GlobalMemory m) { 
     List<String> resValRow = new ArrayList<String>();
 	resValRow.addAll(specification.getResults());	
-	int ri = resValRow.indexOf("available.b");
+	int ri = resValRow.indexOf("available.mb");
 	if (ri >= 0) {
-	  resValRow.set(ri, String.valueOf(m.getAvailable()));
+	  resValRow.set(ri, String.valueOf(m.getAvailable() / (1024*1024)));
 	}
 	ri = resValRow.indexOf("total.b");
 	if (ri >= 0) {

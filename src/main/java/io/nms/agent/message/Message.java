@@ -183,8 +183,8 @@ public class Message {
 	 */
 	public void setSchema() {
 		//int sResults = this.results.hashCode();
-		//int sParameters = this.parameters.hashCode();		
-		this.schema = getMd5(name + endpoint + agentId);
+		int sParameters = this.parameters.hashCode();
+		this.schema = getMd5(name + endpoint + agentId + sParameters);
 	}
 	/* --------------------------------------------------- */
 	

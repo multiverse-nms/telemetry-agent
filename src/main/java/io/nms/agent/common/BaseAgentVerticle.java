@@ -51,7 +51,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected JsonObject moduleConfig = new JsonObject();
 	
 	// TODO: put in config file
-	protected int heartbeatMs = 60000 * 30;
+	protected int heartbeatMs = 60000;
 	
 	// reference to task manager
 	protected TaskManager taskManager;
@@ -144,12 +144,11 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 			rct.setTimestampNow();
 			return rct;
 		}
-		
-		// use (token + capability name) as task ID:
-		//String taskId = spec.getToken() + "-" + spec.getName();
-		
-		// use spec.schema as task id
-		String taskId = spec.getSchema();
+	
+		// use schema as task id
+		// create receipt to update schema (i.e., include parameters values)
+		Message rct = new Receipt(spec);
+		String taskId = rct.getSchema();
 		
 		LOG.info("Corresponding task found and checked: "+taskId);
 		
@@ -172,12 +171,10 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 				// schedule task and store reference
 				taskManager.submit(task, task.getInitialDelayMs(), task.getTaskPeriodMs());
 			}
-			// create receipt
-			Message rct = new Receipt(spec);
 			rct.setTimestampNow();
 			return rct;
 		}
-		Message rct = new Receipt(spec);
+		// Message rct = new Receipt(spec);
 		rct.setErrors(Arrays.asList(Errors.TaskManager.WHEN_UNSUPPORTED));
 		rct.setTimestampNow();
 		return rct;
@@ -185,7 +182,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	
 	private Message processInterrupt(Interrupt itr) {
 		LOG.info("Process Interrupt.");
-		Message rct = new Receipt(itr);		
+		Message rct = new Receipt(itr);
 		String taskId = itr.getSchema();
 		if (tasks.containsKey(taskId)) {
 			if (tasks.get(taskId).decrementSpecNbr() == 0) {
@@ -222,7 +219,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	public void onResult(String taskId, short resultCode, Timestamp ts) {
 		AbstractAgentTask t = tasks.get(taskId);
 		if (t == null) {
-			LOG.info("No task found for: "+taskId);
+			LOG.info("onResult. No task found: "+taskId);
 			return;
 		}
 		if (resultCode == Errors.TASK_SUCCESS) {
