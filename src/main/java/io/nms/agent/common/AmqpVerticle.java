@@ -111,6 +111,42 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 			}
 		});
 	}
+
+	protected void subscribeToSpecifications2(Promise<Void> promise) {
+		connection.createReceiver(agentName+"/"+moduleName+"/specifications", ar -> {
+			if (ar.succeeded()) {
+				AmqpReceiver receiver = ar.result();
+				receiver.handler(msg -> {
+					Message req = Message.fromJsonString(msg.bodyAsString());
+					if (req != null) {
+						Message rep = processMessage(req);
+
+						connection.createSender(rep.getEndpoint()+"/specifications/receipt", done -> {
+							if (done.failed()) {
+								LOG.error("Unable to publish receipts.", done.cause());
+							} else {
+								AmqpSender sender = done.result();
+								AmqpMessage receiptBody = 
+										AmqpMessage.create().withBody(Message.toJsonString(rep, false)).build();
+								sender.send(receiptBody);
+							}
+						});
+					}
+				});
+				LOG.info(moduleName+" module ready to receive Specifications.");
+				promise.complete();
+			} else {
+				promise.fail(ar.cause());
+			}
+		});
+		connection.createAnonymousSender(responseSender -> {
+			if (responseSender.succeeded()) {
+				
+			} else {
+				promise.fail(responseSender.cause());
+			}
+		});
+	}
 	
 	/* Agent is publisher. pub-sub for Agents to send Results */
 	protected void publishResult(String res, Promise<Void> promise) {
