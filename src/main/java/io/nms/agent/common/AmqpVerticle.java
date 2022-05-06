@@ -120,8 +120,8 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 					Message req = Message.fromJsonString(msg.bodyAsString());
 					if (req != null) {
 						Message rep = processMessage(req);
-
-						connection.createSender(rep.getEndpoint()+"/specifications/receipt", done -> {
+						String receiptTopic = msg.replyTo();
+						connection.createSender(receiptTopic, done -> {
 							if (done.failed()) {
 								LOG.error("Unable to publish receipts.", done.cause());
 							} else {

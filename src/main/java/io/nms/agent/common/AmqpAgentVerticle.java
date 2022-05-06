@@ -39,7 +39,7 @@ public class AmqpAgentVerticle extends AmqpVerticle {
 				return Future.<Void>future(promise -> publishCapabilities(promise));
 			})
 			.compose(v -> {
-				return Future.<Void>future(promise -> subscribeToSpecifications(promise));
+				return Future.<Void>future(promise -> subscribeToSpecifications2(promise));
 			});
 			futInit.onComplete(res -> {
 				if (res.failed()) {
