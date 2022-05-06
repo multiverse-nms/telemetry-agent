@@ -68,7 +68,7 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 			String sCap  = Message.toJsonString(c, false);
 			//JsonObject jCap = new JsonObject(sCap);
 			
-			connection.createSender("/capabilities", done -> {
+			connection.createSender("topic://"+"/capabilities", done -> {
 				if (done.failed()) {
 					p.fail(done.cause());
 				} else {
@@ -86,7 +86,7 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 	protected void subscribeToSpecifications(Promise<Void> promise) {
 		connection.createAnonymousSender(responseSender -> {
 			if (responseSender.succeeded()) {
-				connection.createReceiver(agentName+"/"+moduleName+"/specifications", ar -> {
+				connection.createReceiver("topic://"+agentName+"/"+moduleName+"/specifications", ar -> {
 					if (ar.succeeded()) {
 						AmqpReceiver receiver = ar.result();
 						receiver.handler(msg -> {
@@ -113,7 +113,7 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 	}
 
 	protected void subscribeToSpecifications2(Promise<Void> promise) {
-		connection.createReceiver(agentName+"/"+moduleName+"/specifications", ar -> {
+		connection.createReceiver("topic://"+agentName+"/"+moduleName+"/specifications", ar -> {
 			if (ar.succeeded()) {
 				AmqpReceiver receiver = ar.result();
 				receiver.handler(msg -> {
@@ -151,7 +151,7 @@ public abstract class AmqpVerticle extends BaseAgentVerticle {
 	/* Agent is publisher. pub-sub for Agents to send Results */
 	protected void publishResult(String res, Promise<Void> promise) {
 		Message m = Message.fromJsonString(res);
-		connection.createSender(m.getEndpoint()+"/results/"+m.getRole(), done -> {
+		connection.createSender("topic://"+m.getEndpoint()+"/results", done -> {
 			if (done.failed()) {
 				LOG.error("Unable to publish results.", done.cause());
 				promise.fail(done.cause());

@@ -51,7 +51,7 @@ public abstract class BaseAgentVerticle extends AbstractVerticle implements Agen
 	protected JsonObject moduleConfig = new JsonObject();
 	
 	// TODO: put in config file
-	protected int heartbeatMs = 60000;
+	protected int heartbeatMs = 1000 * 10;
 	
 	// reference to task manager
 	protected TaskManager taskManager;
